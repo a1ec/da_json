@@ -5,6 +5,8 @@ import requests
 import jsondict
 import urllib
 
+da = {}
+
 def td_text_after(label, tree):
     """ retrieves text from first td following a td containing a label e.g.:"""
     a = tree.xpath("//*[contains(text(), '" + label + "')]/following-sibling::td//text()")#.extract_first()
@@ -23,7 +25,6 @@ def parse_da_page(tree):
                'est_cost': 'Estimated Cost:', 'status': 'Status:',
                'date_determined': 'Date Determined:', 'decision': 'Decision:',
                'officer': 'Responsible Officer:' }
-    da = {}
     # map DA fields with those in the following <td> elements on the page
     for i in labels:
         da[i] = td_text_after(labels[i], tree)
@@ -43,6 +44,10 @@ def get_da_by_da_no(da_no):
     print(url + '\n')
     page = requests.get(url)
     tree = html.fromstring(page.content)
-    da_url = ''
-    da_url = tree.xpath('//td[@class="datrack_danumber_cell"]//@href')[0]
-    return get_da_by_url(da_url)
+    # get the address info from the individual DA listing page
+    da['da_no'] = tree.xpath('//td[@class="datrack_danumber_cell"]//text()')[0]#.extract_first()
+    da['house_no'] = tree.xpath('//td[@class="datrack_houseno_cell"]//text()')[0]#.extract_first()
+    da['street'] = tree.xpath('//td[@class="datrack_street_cell"]//text()')[0]#.extract_first()
+    da['town'] = tree.xpath('//td[@class="datrack_town_cell"]//text()')[0]#.extract_first()"""
+    da['url'] = tree.xpath('//td[@class="datrack_danumber_cell"]//@href')[0]
+    return get_da_by_url(da['url'])
