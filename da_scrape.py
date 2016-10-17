@@ -28,6 +28,19 @@ def parse_da_page(tree):
     # map DA fields with those in the following <td> elements on the page
     for i in labels:
         da[i] = td_text_after(labels[i], tree)
+    # required for unicode character replacement of '$' and ',' in est_cost
+    translation_table = dict.fromkeys(map(ord, '$,'), None)
+    
+    if da['est_cost'] != None:
+        da['est_cost'] = int(da['est_cost'].translate(translation_table))
+    
+    da['names'] = []
+    for row in tree.xpath('//table/tr[th[1]="Role"]/following-sibling::tr'):    
+        da_name = {}
+        da_name['role'] = row.xpath('normalize-space(./td[1])')#.extract_first()            
+        da_name['name_no'] = row.xpath('normalize-space(./td[2])')#.extract_first()
+        da_name['full_name'] = row.xpath('normalize-space(./td[3])')#.extract_first()
+        da['names'].append(da_name)
     return da
 
 def get_da_by_url(url):
